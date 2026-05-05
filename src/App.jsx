@@ -50,8 +50,8 @@ body{font-family:'Inter',sans-serif;color:var(--txt);background:var(--bg);-webki
   )}
 .splash-body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 1.5rem 3.5rem;max-width:560px;width:100%;margin:0 auto}
 .splash-eyebrow{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;opacity:0;animation:rise .7s .2s ease forwards}
-.splash-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,12vw,5.5rem);font-weight:300;line-height:1;margin-bottom:.5rem;letter-spacing:-.01em;opacity:0;animation:rise .7s .35s ease forwards}
-.splash-title em{font-style:italic;background:linear-gradient(135deg,var(--gold),#FFD580,var(--gold));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 5s linear infinite;font-weight:300}
+.splash-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,13vw,6.5rem);font-weight:700;line-height:1;margin-bottom:.5rem;letter-spacing:-.02em;opacity:0;animation:rise .7s .35s ease forwards}
+.splash-title em{font-style:italic;background:linear-gradient(135deg,#FFD580,#F5B030,#FFE090,#E8A020);background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 5s linear infinite;font-weight:700;filter:drop-shadow(0 2px 16px rgba(232,160,32,.5)) drop-shadow(0 4px 6px rgba(0,0,0,.6))}
 .splash-subtitle{font-size:.95rem;color:rgba(245,240,235,.65);font-weight:300;letter-spacing:.08em;margin-bottom:2.5rem;opacity:0;animation:rise .7s .5s ease forwards}
 .splash-cta{opacity:0;animation:rise .7s .65s ease forwards;display:flex;flex-direction:column;gap:.85rem}
 .splash-btn-main{display:flex;align-items:center;justify-content:space-between;width:100%;padding:1.1rem 1.5rem;background:var(--gold);color:#0A0705;border:none;border-radius:14px;font-family:'Inter';font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s;letter-spacing:.02em}
