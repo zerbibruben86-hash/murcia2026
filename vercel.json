@@ -1,5 +1,4 @@
 {
-  "name": "murcia2026",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
