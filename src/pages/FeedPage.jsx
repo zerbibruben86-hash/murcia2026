@@ -9,7 +9,7 @@ import PullToRefresh from "../components/PullToRefresh";
 import PostcardSheet from "../components/PostcardSheet";
 import EditProfileSheet from "../components/EditProfileSheet";
 import { db } from "../firebase";
-import { getDoc, doc, setDoc, onSnapshot, collection } from "firebase/firestore";
+import { getDoc, doc, setDoc, onSnapshot, collection, getDocs, query, where, orderBy } from "firebase/firestore";
 
 export default function FeedPage() {
   const {
@@ -33,6 +33,10 @@ export default function FeedPage() {
   const [lightbox,     setLightbox]     = useState(null);
   const [postcardPost, setPostcardPost] = useState(null);
   const [viewedProfile, setViewedProfile] = useState(null); // userKey → ouvre le profil d'un autre utilisateur
+  const [profileAllPosts, setProfileAllPosts] = useState([]); // tous les posts de viewedProfile
+  const [profilePostsLoading, setProfilePostsLoading] = useState(false);
+  const [myAllPosts, setMyAllPosts] = useState([]); // tous mes posts (onglet Mon profil)
+  const [myAllPostsLoaded, setMyAllPostsLoaded] = useState(false);
   const [myProfileTab,     setMyProfileTab]     = useState("photos"); // "photos" | "comments"
   const [viewedProfileTab, setViewedProfileTab] = useState("photos"); // "photos" | "comments"
   const [showSubsSheet,   setShowSubsSheet]   = useState(false);
@@ -143,7 +147,29 @@ export default function FeedPage() {
   }, [pendingFeedTab]);
 
   // Reset l'onglet contenu quand on change de profil consulté
-  useEffect(() => { setViewedProfileTab("photos"); }, [viewedProfile]);
+  // Charge tous mes posts quand j'ouvre l'onglet "profil"
+  useEffect(() => {
+    if (activeTab !== "profil" || !myKey || !db || myAllPostsLoaded) return;
+    getDocs(query(collection(db, "posts"), where("authorKey", "==", myKey), orderBy("at", "desc")))
+      .then(snap => {
+        setMyAllPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setMyAllPostsLoaded(true);
+      })
+      .catch(() => {});
+  }, [activeTab, myKey, myAllPostsLoaded]);
+
+  useEffect(() => {
+    setViewedProfileTab("photos");
+    setProfileAllPosts([]);
+    if (!viewedProfile || !db) return;
+    setProfilePostsLoading(true);
+    getDocs(query(collection(db, "posts"), where("authorKey", "==", viewedProfile), orderBy("at", "desc")))
+      .then(snap => {
+        setProfileAllPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      })
+      .catch(() => {})
+      .finally(() => setProfilePostsLoading(false));
+  }, [viewedProfile]);
 
   // Charge directement depuis Firestore si le contexte n'a pas encore les données
   useEffect(() => {
@@ -603,7 +629,7 @@ export default function FeedPage() {
                         ))}
                       </div>
 
-                      {myProfileTab === "photos" && (myPosts.length === 0 ? (
+                      {myProfileTab === "photos" && (myAllPosts.length === 0 ? (
                         <div className="feed-empty">
                           <div className="ico">📷</div>
                           <div style={{ fontWeight:600,fontSize:"1rem" }}>Aucune publication</div>
@@ -611,7 +637,7 @@ export default function FeedPage() {
                         </div>
                       ) : (
                         <div style={{ margin:"0 1rem",display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:3 }}>
-                          {myPosts.map(post => {
+                          {myAllPosts.map(post => {
                             const likes = post.likes || 0;
                             return (
                               <div key={post.id} onClick={() => setLightbox(post)}
@@ -632,7 +658,7 @@ export default function FeedPage() {
                       {myProfileTab === "comments" && (
                         <div style={{ margin:"0 0 2rem" }}>
                           <CommentsTab
-                            userPosts={myPosts}
+                            userPosts={myAllPosts}
                             onGoToPost={post => { setActiveTab("feed"); setScrollToPostId(post.id); }}
                           />
                         </div>
@@ -1111,14 +1137,18 @@ export default function FeedPage() {
 
               {/* Contenu scrollable */}
               <div style={{ overflowY:"auto",flex:1,WebkitOverflowScrolling:"touch",paddingBottom:"calc(1rem + env(safe-area-inset-bottom))" }}>
-                {viewedProfileTab === "photos" && (pd.userPosts.length === 0 ? (
+                {viewedProfileTab === "photos" && (profilePostsLoading ? (
+                  <div style={{ textAlign:"center",padding:"3rem 1rem",color:"rgba(245,240,235,.35)" }}>
+                    <div style={{ fontSize:".85rem" }}>Chargement…</div>
+                  </div>
+                ) : profileAllPosts.length === 0 ? (
                   <div style={{ textAlign:"center",padding:"3rem 1rem",color:"rgba(245,240,235,.35)" }}>
                     <div style={{ fontSize:"2rem",marginBottom:".75rem" }}>📷</div>
                     <div style={{ fontSize:".88rem" }}>Aucune photo pour l'instant</div>
                   </div>
                 ) : (
                   <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:3,padding:3 }}>
-                    {pd.userPosts.map(post => {
+                    {profileAllPosts.map(post => {
                       const likes = post.likes || 0;
                       return (
                         <div key={post.id} onClick={() => { setViewedProfile(null); setTimeout(() => setLightbox(post), 160); }}
@@ -1138,7 +1168,7 @@ export default function FeedPage() {
 
                 {viewedProfileTab === "comments" && (
                   <CommentsTab
-                    userPosts={pd.userPosts}
+                    userPosts={profileAllPosts}
                     onGoToPost={post => { setViewedProfile(null); setTimeout(() => { setActiveTab("feed"); setScrollToPostId(post.id); }, 200); }}
                   />
                 )}
