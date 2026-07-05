@@ -762,7 +762,13 @@ export default function FeedPage() {
                       const canDelCmt = isAdmin || currentUser?.role === "staff" || (currentUser && (c.authorKey ? c.authorKey === userKey : c.author.toLowerCase() === currentUser.fn.toLowerCase()));
                       return (
                         <div key={i} className="cmt">
-                          <span className="cmt-author">{c.author}</span>
+                          <span className="cmt-author" style={{ cursor:c.authorKey ? "pointer" : "default" }}
+                            onClick={c.authorKey ? () => {
+                              if (c.authorKey === userKey) { setActiveTab("profil"); window.scrollTo({top:0,behavior:"smooth"}); }
+                              else setViewedProfile(c.authorKey);
+                            } : undefined}>
+                            {c.author}
+                          </span>
                           <span className="cmt-text">{renderMentions(c.text)}</span>
                           {canDelCmt && <button className="del-cmt" onClick={() => handleDeleteComment(post.id, i)}>✕</button>}
                         </div>
