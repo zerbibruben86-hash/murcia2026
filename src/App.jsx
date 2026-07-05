@@ -2,6 +2,7 @@ import { useContext, lazy, Suspense, useEffect, useState } from "react";
 import { AppProvider, AppContext } from "./context/AppContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import BottomNav from "./components/BottomNav";
+import { Analytics } from "@vercel/analytics/react";
 import "./styles.css";
 
 // Pages critiques — chargées immédiatement
@@ -149,6 +150,7 @@ export default function App() {
   return (
     <AppProvider>
       <Router/>
+      <Analytics/>
     </AppProvider>
   );
 }
