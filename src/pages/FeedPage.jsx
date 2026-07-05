@@ -146,6 +146,9 @@ export default function FeedPage() {
     setPendingFeedTab(null);
   }, [pendingFeedTab]);
 
+  // Onglet "Mon profil" — clé utilisateur (déclarée avant les effets qui en dépendent)
+  const myKey = currentUser ? `${currentUser.fn.toLowerCase()}_${currentUser.ln.toLowerCase()}` : null;
+
   // Reset l'onglet contenu quand on change de profil consulté
   // Charge tous mes posts quand j'ouvre l'onglet "profil"
   useEffect(() => {
@@ -212,7 +215,6 @@ export default function FeedPage() {
     : [];
 
   // Onglet "Mon profil" — données
-  const myKey = currentUser ? `${currentUser.fn.toLowerCase()}_${currentUser.ln.toLowerCase()}` : null;
   const myPosts = myKey ? posts.filter(p => p.authorKey === myKey) : [];
 
   // Helper : données de profil pour n'importe quel userKey
@@ -609,7 +611,7 @@ export default function FeedPage() {
 
                         {/* Abonnements row */}
                         <button onClick={() => setShowSubsSheet(true)}
-                          style={{ width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:".85rem",paddingTop:".75rem",borderTop:"1px solid rgba(255,255,255,.07)",background:"none",border:"none",borderTop:"1px solid rgba(255,255,255,.07)",cursor:"pointer",color:"var(--txt)",textAlign:"left" }}>
+                          style={{ width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:".85rem",paddingTop:".75rem",background:"none",border:"none",borderTop:"1px solid rgba(255,255,255,.07)",cursor:"pointer",color:"var(--txt)",textAlign:"left" }}>
                           <div style={{ display:"flex",alignItems:"center",gap:".55rem" }}>
                             <span style={{ fontSize:"1rem" }}>🔔</span>
                             <div>

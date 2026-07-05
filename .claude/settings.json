@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run preview:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git pull)",
+      "Bash(git add:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
+    ],
+    "ask": [
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(git push:*)",
+      "Edit(firestore.rules)",
+      "Edit(storage.rules)",
+      "Edit(vercel.json)",
+      "Edit(deploy.sh)"
+    ],
+    "deny": [
+      "Bash(npm run deploy)",
+      "Bash(bash deploy.sh:*)",
+      "Bash(./deploy.sh:*)",
+      "Bash(sh deploy.sh:*)",
+      "Bash(npx vercel:*)",
+      "Bash(vercel:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(npx firebase:*)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  }
+}
