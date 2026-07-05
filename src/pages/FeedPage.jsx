@@ -9,7 +9,7 @@ import PullToRefresh from "../components/PullToRefresh";
 import PostcardSheet from "../components/PostcardSheet";
 import EditProfileSheet from "../components/EditProfileSheet";
 import { db } from "../firebase";
-import { getDoc, doc, setDoc, onSnapshot, collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { getDoc, doc, setDoc, onSnapshot, collection, getDocs, query, where } from "firebase/firestore";
 
 export default function FeedPage() {
   const {
@@ -150,9 +150,11 @@ export default function FeedPage() {
   // Charge tous mes posts quand j'ouvre l'onglet "profil"
   useEffect(() => {
     if (activeTab !== "profil" || !myKey || !db || myAllPostsLoaded) return;
-    getDocs(query(collection(db, "posts"), where("authorKey", "==", myKey), orderBy("at", "desc")))
+    getDocs(query(collection(db, "posts"), where("authorKey", "==", myKey)))
       .then(snap => {
-        setMyAllPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const sorted = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
+        setMyAllPosts(sorted);
         setMyAllPostsLoaded(true);
       })
       .catch(() => {});
@@ -163,9 +165,11 @@ export default function FeedPage() {
     setProfileAllPosts([]);
     if (!viewedProfile || !db) return;
     setProfilePostsLoading(true);
-    getDocs(query(collection(db, "posts"), where("authorKey", "==", viewedProfile), orderBy("at", "desc")))
+    getDocs(query(collection(db, "posts"), where("authorKey", "==", viewedProfile)))
       .then(snap => {
-        setProfileAllPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const sorted = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
+        setProfileAllPosts(sorted);
       })
       .catch(() => {})
       .finally(() => setProfilePostsLoading(false));
