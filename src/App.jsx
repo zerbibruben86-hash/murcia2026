@@ -2,7 +2,6 @@ import { useContext, lazy, Suspense, useEffect, useState } from "react";
 import { AppProvider, AppContext } from "./context/AppContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import BottomNav from "./components/BottomNav";
-import { inject } from "@vercel/analytics";
 import "./styles.css";
 
 // Pages critiques — chargées immédiatement
@@ -117,10 +116,6 @@ function MurciagramBanner() {
   );
 }
 
-function AnalyticsInit() {
-  useEffect(() => { inject(); }, []);
-  return null;
-}
 
 // Fallback pendant le chargement d'une page lazy
 function PageSkeleton() {
@@ -155,7 +150,6 @@ export default function App() {
   return (
     <AppProvider>
       <Router/>
-      <AnalyticsInit/>
     </AppProvider>
   );
 }
