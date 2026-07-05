@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Accès public lecture/écriture (app sans auth Firebase)
+    // Pour sécuriser plus tard : ajouter des règles par collection
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
