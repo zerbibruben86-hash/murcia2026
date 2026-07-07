@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { IMG_POOL, barCol } from "../utils/helpers";
+import { IMG_POOL } from "../utils/helpers";
 import { Hdr, Drawer } from "../components/Header";
 import Confetti from "../components/Confetti";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -119,7 +119,6 @@ export default function InscriptionsPage() {
               <div className="grid">
                 {tabActs.map(act => {
                   const st = status(act);
-                  const pct = Math.min(st.tot / act.maxTotal * 100, 100);
                   const isSel = selId === act.id;
                   const places = act.maxTotal - st.tot;
                   return (
@@ -138,9 +137,7 @@ export default function InscriptionsPage() {
                       <div className="card-body">
                         <div className="card-name">{act.emoji} {act.name}</div>
                         <div className="card-desc">{act.desc}</div>
-                        <div className="cap-bar-bg"><div className="cap-bar" style={{ width:pct+"%", background:barCol(st.tot, act.maxTotal) }}/></div>
                         <div className="cap-row">
-                          <span className="cap-txt" style={{ color:barCol(st.tot, act.maxTotal) }}>{st.tot} / {act.maxTotal}</span>
                           {st.totalFull && <span className="tag tag-full">Complet</span>}
                           {!st.totalFull && places <= 5 && <span className="tag tag-few">⚡ {places} place{places > 1 ? "s" : ""}</span>}
                           {isSel && !st.totalFull && actIsOpen(act) && <span className="tag tag-sel">✓ Choisi</span>}
