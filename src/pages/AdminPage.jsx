@@ -13,6 +13,8 @@ export default function AdminPage() {
   const [showWinnersHistory, setShowWinnersHistory] = useState(false);
   const [mp3Uploading, setMp3Uploading] = useState(false);
   const [mp3Msg, setMp3Msg] = useState("");
+  const [editingActId, setEditingActId] = useState(null);
+  const [editAct, setEditAct] = useState(null);
 
   const {
     acts, regs, children, cfg, confetti, confirmDlg, setConfirmDlg,
@@ -25,13 +27,27 @@ export default function AdminPage() {
     allPins, setAllPins, navTo,
     tBoys, tGirls, filtRegs, qrUrl, status, totalFor,
     actPeriodMsg, avgRating: avgRatingCtx,
-    saveCfg, saveChildren,
+    saveCfg, saveChildren, saveActs,
     handleBanUser, handleAddAct, handleArchiveAct, handleDelAct, handleDelReg, handleChangePwd,
     handleAddChild, handleDelChild, handleBulkImport, exportCSV,
     handleToggleActClosed, loadPins,
     challenges, challSubs, newChall, setNewChall,
     handleAddChallenge, handleDeleteChallenge, handleToggleChallengeActive, handleSetWinner,
   } = useContext(AppContext);
+
+  const startEditAct = act => {
+    setEditingActId(act.id);
+    setEditAct({ limitTotal:!!act.limitTotal, useQuotas:!!act.useQuotas, maxTotal:act.maxTotal, maxBoys:act.maxBoys, maxGirls:act.maxGirls });
+  };
+  const cancelEditAct = () => { setEditingActId(null); setEditAct(null); };
+  const saveEditAct = async () => {
+    const updated = acts.map(a => a.id===editingActId ? { ...a,
+      limitTotal:editAct.limitTotal, useQuotas:editAct.useQuotas,
+      maxTotal:+editAct.maxTotal||15, maxBoys:+editAct.maxBoys||0, maxGirls:+editAct.maxGirls||0,
+    } : a);
+    await saveActs(updated);
+    cancelEditAct();
+  };
 
   return (
     <div style={{ position:"relative",minHeight:"100vh" }}>
@@ -144,23 +160,38 @@ export default function AdminPage() {
                   </div>
                   {typeActs.map(act=>{
                     const st=status(act); const avg=avgRating(act.id,regs);
+                    const editing=editingActId===act.id;
                     return(
-                      <div key={act.id} className="ar">
+                      <div key={act.id} className="ar" style={{flexWrap:editing?"wrap":"nowrap"}}>
                         <div className="ar-ico" style={{background:act.color+"22"}}>{act.photo?<img src={act.photo} alt={act.name}/>:act.emoji}</div>
                         <div className="ar-inf">
                           <div className="ar-nm">{act.name}{avg>0&&<span style={{fontSize:".75rem",color:"var(--gold)"}}> ⭐{avg.toFixed(1)}</span>}</div>
                           <div className="ar-dc">{act.desc||"—"}</div>
-                          <div className="ar-counts">
+                          {!editing&&<div className="ar-counts">
                             {act.limitTotal&&act.useQuotas&&<><span className="gc b">♂ {st.b}/{act.maxBoys}</span><span className="gc g">♀ {st.g}/{act.maxGirls}</span><span className="gc t">{st.tot}/{act.maxTotal}</span></>}
                             {act.limitTotal&&!act.useQuotas&&<span className="gc t">{st.tot}/{act.maxTotal}</span>}
                             {!act.limitTotal&&!act.useQuotas&&<span className="gc nq">∞ sans quota</span>}
                             {actPeriodMsg(act)&&<span className="gc" style={{background:"#FFF8EC",color:"#92400E",fontSize:".68rem"}}>{actPeriodMsg(act)}</span>}
-                          </div>
+                          </div>}
+                          {editing&&<div style={{marginTop:".5rem"}}>
+                            <div className="toggle-row"><label className="toggle"><input type="checkbox" checked={editAct.limitTotal} onChange={e=>setEditAct(a=>({...a,limitTotal:e.target.checked}))}/><span className="tslider"/></label><span className="toggle-lbl">Limiter le nombre total d'inscrits</span></div>
+                            <div className="toggle-row"><label className="toggle"><input type="checkbox" checked={editAct.useQuotas} onChange={e=>setEditAct(a=>({...a,useQuotas:e.target.checked}))}/><span className="tslider"/></label><span className="toggle-lbl">Quotas garçons / filles séparés</span></div>
+                            {(editAct.limitTotal||editAct.useQuotas)&&<div className="fg3" style={{marginTop:".4rem"}}>
+                              {editAct.limitTotal&&<div className="fl"><label>Max inscrits (total)</label><input type="number" min="1" max="200" value={editAct.maxTotal} onChange={e=>setEditAct(a=>({...a,maxTotal:e.target.value}))}/></div>}
+                              {editAct.useQuotas&&<div className="fl"><label>Max garçons ♂</label><input type="number" min="0" max="200" value={editAct.maxBoys} onChange={e=>setEditAct(a=>({...a,maxBoys:e.target.value}))}/></div>}
+                              {editAct.useQuotas&&<div className="fl"><label>Max filles ♀</label><input type="number" min="0" max="200" value={editAct.maxGirls} onChange={e=>setEditAct(a=>({...a,maxGirls:e.target.value}))}/></div>}
+                            </div>}
+                            <div style={{display:"flex",gap:".5rem",marginTop:".6rem"}}>
+                              <button className="add-btn" style={{margin:0}} onClick={saveEditAct}>💾 Enregistrer</button>
+                              <button className="del-btn" onClick={cancelEditAct}>Annuler</button>
+                            </div>
+                          </div>}
                         </div>
-                        <div style={{display:"flex",flexDirection:"column",gap:".35rem",flexShrink:0,alignItems:"flex-end"}}>
+                        {!editing&&<div style={{display:"flex",flexDirection:"column",gap:".35rem",flexShrink:0,alignItems:"flex-end"}}>
                           <button className={`act-toggle-btn ${act.closed?"closed":"open"}`} onClick={()=>handleToggleActClosed(act.id)}>{act.closed?"🔒 Fermé":"🟢 Ouvert"}</button>
+                          <button className="del-btn" style={{background:"rgba(232,160,32,.15)",borderColor:"rgba(232,160,32,.4)",color:"var(--gold)",fontSize:".72rem",padding:".3rem .6rem"}} onClick={()=>startEditAct(act)}>✏️ Cotas</button>
                           <button className="del-btn" style={{background:"rgba(147,51,234,.15)",borderColor:"rgba(147,51,234,.4)",color:"#c084fc",fontSize:".72rem",padding:".3rem .6rem"}} onClick={()=>handleArchiveAct(act.id)}>📦 Archiver</button>
-                        </div>
+                        </div>}
                       </div>
                     );
                   })}
